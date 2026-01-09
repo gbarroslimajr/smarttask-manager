@@ -1,6 +1,6 @@
 package com.smarttask.exception;
 
-public class ConcurrentModificationException extends RuntimeException {
+public final class ConcurrentModificationException extends DomainException {
 
     public ConcurrentModificationException(String message) {
         super(message);

@@ -16,40 +16,32 @@ import java.util.stream.Collectors;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleEntityNotFound(EntityNotFoundException ex, WebRequest request) {
-        ErrorResponse error = new ErrorResponse(
-            LocalDateTime.now(),
-            HttpStatus.NOT_FOUND.value(),
-            "Not Found",
-            ex.getMessage(),
-            request.getDescription(false).replace("uri=", "")
-        );
-        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
-    }
+    @ExceptionHandler(DomainException.class)
+    public ResponseEntity<ErrorResponse> handleDomainException(DomainException ex, WebRequest request) {
+        HttpStatus status = switch (ex) {
+            case UserNotFoundException e -> HttpStatus.NOT_FOUND;
+            case TaskNotFoundException e -> HttpStatus.NOT_FOUND;
+            case ProjectNotFoundException e -> HttpStatus.NOT_FOUND;
+            case EmailAlreadyExistsException e -> HttpStatus.CONFLICT;
+            case ConcurrentModificationException e -> HttpStatus.CONFLICT;
+        };
 
-    @ExceptionHandler(EmailAlreadyExistsException.class)
-    public ResponseEntity<ErrorResponse> handleEmailAlreadyExists(EmailAlreadyExistsException ex, WebRequest request) {
-        ErrorResponse error = new ErrorResponse(
-            LocalDateTime.now(),
-            HttpStatus.CONFLICT.value(),
-            "Conflict",
-            ex.getMessage(),
-            request.getDescription(false).replace("uri=", "")
-        );
-        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
-    }
+        String errorTitle = switch (ex) {
+            case UserNotFoundException e -> "Not Found";
+            case TaskNotFoundException e -> "Not Found";
+            case ProjectNotFoundException e -> "Not Found";
+            case EmailAlreadyExistsException e -> "Conflict";
+            case ConcurrentModificationException e -> "Concurrent Modification";
+        };
 
-    @ExceptionHandler(ConcurrentModificationException.class)
-    public ResponseEntity<ErrorResponse> handleConcurrentModification(ConcurrentModificationException ex, WebRequest request) {
         ErrorResponse error = new ErrorResponse(
             LocalDateTime.now(),
-            HttpStatus.CONFLICT.value(),
-            "Concurrent Modification",
+            status.value(),
+            errorTitle,
             ex.getMessage(),
             request.getDescription(false).replace("uri=", "")
         );
-        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+        return new ResponseEntity<>(error, status);
     }
 
     @ExceptionHandler(OptimisticLockException.class)
