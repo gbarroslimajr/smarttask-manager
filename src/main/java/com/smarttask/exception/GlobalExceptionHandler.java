@@ -18,21 +18,28 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DomainException.class)
     public ResponseEntity<ErrorResponse> handleDomainException(DomainException ex, WebRequest request) {
-        HttpStatus status = switch (ex) {
-            case UserNotFoundException e -> HttpStatus.NOT_FOUND;
-            case TaskNotFoundException e -> HttpStatus.NOT_FOUND;
-            case ProjectNotFoundException e -> HttpStatus.NOT_FOUND;
-            case EmailAlreadyExistsException e -> HttpStatus.CONFLICT;
-            case ConcurrentModificationException e -> HttpStatus.CONFLICT;
-        };
+        HttpStatus status;
+        String errorTitle;
 
-        String errorTitle = switch (ex) {
-            case UserNotFoundException e -> "Not Found";
-            case TaskNotFoundException e -> "Not Found";
-            case ProjectNotFoundException e -> "Not Found";
-            case EmailAlreadyExistsException e -> "Conflict";
-            case ConcurrentModificationException e -> "Concurrent Modification";
-        };
+        if (ex instanceof UserNotFoundException) {
+            status = HttpStatus.NOT_FOUND;
+            errorTitle = "Not Found";
+        } else if (ex instanceof TaskNotFoundException) {
+            status = HttpStatus.NOT_FOUND;
+            errorTitle = "Not Found";
+        } else if (ex instanceof ProjectNotFoundException) {
+            status = HttpStatus.NOT_FOUND;
+            errorTitle = "Not Found";
+        } else if (ex instanceof EmailAlreadyExistsException) {
+            status = HttpStatus.CONFLICT;
+            errorTitle = "Conflict";
+        } else if (ex instanceof ConcurrentModificationException) {
+            status = HttpStatus.CONFLICT;
+            errorTitle = "Concurrent Modification";
+        } else {
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+            errorTitle = "Internal Server Error";
+        }
 
         ErrorResponse error = new ErrorResponse(
             LocalDateTime.now(),
