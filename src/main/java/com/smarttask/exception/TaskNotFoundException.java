@@ -1,0 +1,14 @@
+package com.smarttask.exception;
+
+import java.util.UUID;
+
+public class TaskNotFoundException extends EntityNotFoundException {
+
+    public TaskNotFoundException(UUID id) {
+        super("Tarefa não encontrada com ID: " + id);
+    }
+
+    public TaskNotFoundException(String message) {
+        super(message);
+    }
+}
